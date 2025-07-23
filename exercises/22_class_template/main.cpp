@@ -1,6 +1,13 @@
 ﻿#include "../exercise.h"
 #include <cstring>
+#include <iostream>
 // READ: 类模板 <https://zh.cppreference.com/w/cpp/language/class_template>
+
+unsigned int min(unsigned a, unsigned b) {
+    if (a > b) 
+        return b;
+    return a;
+}
 
 template<class T>
 struct Tensor4D {
@@ -10,6 +17,11 @@ struct Tensor4D {
     Tensor4D(unsigned int const shape_[4], T const *data_) {
         unsigned int size = 1;
         // TODO: 填入正确的 shape 并计算 size
+        size = shape_[0] * shape_[1] * shape_[2] * shape_[3];
+        shape[0] = shape_[0];
+        shape[1] = shape_[1];
+        shape[2] = shape_[2];
+        shape[3] = shape_[3];
         data = new T[size];
         std::memcpy(data, data_, size * sizeof(T));
     }
@@ -28,6 +40,23 @@ struct Tensor4D {
     // 则 `this` 与 `others` 相加时，3 个形状为 `[1, 2, 1, 4]` 的子张量各自与 `others` 对应项相加。
     Tensor4D &operator+=(Tensor4D const &others) {
         // TODO: 实现单向广播的加法
+        for (unsigned int d0 = 0; d0 < this->shape[0]; ++d0) {
+            for (unsigned int d1 = 0; d1 < this->shape[1]; ++d1) {
+                for (unsigned int d2 = 0; d2 < this->shape[2]; ++d2) {
+                    for (unsigned int d3 = 0; d3 < this->shape[3]; ++d3) {
+                        int indent1 = d0 * this->shape[1] * this->shape[2] * this->shape[3] +
+                            d1 * this->shape[2] * this->shape[3] + d2 * this->shape[3] + d3;
+                        int d0_ = d0 % others.shape[0];
+                        int d1_ = d1 % others.shape[1];
+                        int d2_ = d2 % others.shape[2];
+                        int d3_ = d3 % others.shape[3];
+                        int indent2 = d0_ * others.shape[1] * others.shape[2] * others.shape[3] + 
+                            d1_ * others.shape[2] * others.shape[3] + d2_ * others.shape[3] + d3_;
+                        this->data[indent1] += others.data[indent2];
+                    }
+                }
+            }
+        }
         return *this;
     }
 };
